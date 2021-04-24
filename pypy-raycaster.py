@@ -43,9 +43,9 @@ import functools
 from PIL import Image
 
 
-SCREEN_WIDTH: int = 240
-SCREEN_HEIGHT: int = 160
-SCALE: int = 4
+SCREEN_WIDTH: int = 800
+SCREEN_HEIGHT: int = 600
+SCALE: int = 1
 WINDOW_WIDTH: int = SCREEN_WIDTH * SCALE
 WINDOW_HEIGHT: int = SCREEN_HEIGHT * SCALE
 TEX_WIDTH: int = 64
@@ -218,7 +218,7 @@ def floorcast_y(y, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
 
 
 @functools.lru_cache(maxsize=128)
-def floorcast_x(floor_x, floor_y, floor_step_x, floor_step_y):
+def floorcast_x(floor_x, floor_y):
     """ Inner loop calculations for floor and ceiling raycasting.
     """
     cell_x, cell_y = int(floor_x), int(floor_y)
@@ -227,10 +227,25 @@ def floorcast_x(floor_x, floor_y, floor_step_x, floor_step_y):
     tx: int = int(TEX_WIDTH * (floor_x - cell_x)) & (TEX_WIDTH - 1)
     ty: int = int(TEX_HEIGHT * (floor_y - cell_y)) & (TEX_HEIGHT - 1)
 
-    floor_x += floor_step_x
-    floor_y += floor_step_y
+    return tx, ty
 
-    return tx, ty, floor_x, floor_y
+
+def floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, step_x, step_y):
+    """ Inner loop calculations for floor and ceiling raycasting.
+    """
+    floor_x += step_x * x
+    floor_y += step_y * x
+    cell_x, cell_y = int(floor_x), int(floor_y)
+
+    # Get texture coordinate from fractional parts
+    tx: int = int(TEX_WIDTH * (floor_x - cell_x)) & (TEX_WIDTH - 1)
+    ty: int = int(TEX_HEIGHT * (floor_y - cell_y)) & (TEX_HEIGHT - 1)
+
+    # Floor
+    copy_color(buffer, x, y, floor_texture, tx, ty)
+
+    # Ceiling
+    copy_color(buffer, x, h - y - 1, ceiling_texture, tx, ty)
 
 
 def copy_color(buffer, x, y, source, tex_x, tex_y) -> None:
@@ -345,13 +360,7 @@ def main() -> None:
             ceiling_texture = colormap[6]
 
             for x in range(0, w):
-                tx, ty, floor_x, floor_y = floorcast_x(floor_x, floor_y, floor_step_x, floor_step_y)
-
-                # Floor
-                copy_color(buffer, x, y, floor_texture, tx, ty)
-
-                # Ceiling
-                copy_color(buffer, x, h - y - 1, ceiling_texture, tx, ty)
+                floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, floor_step_x, floor_step_y)
 
         # Raycasting for wall textures
         for x in range(0, w):
