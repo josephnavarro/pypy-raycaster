@@ -43,9 +43,9 @@ import functools
 from PIL import Image
 
 
-SCREEN_WIDTH: int = 320
-SCREEN_HEIGHT: int = 240
-SCALE: int = 1
+SCREEN_WIDTH: int = 240
+SCREEN_HEIGHT: int = 160
+SCALE: int = 4
 WINDOW_WIDTH: int = SCREEN_WIDTH * SCALE
 WINDOW_HEIGHT: int = SCREEN_HEIGHT * SCALE
 TEX_WIDTH: int = 64
@@ -241,12 +241,10 @@ def copy_color(buffer, x, y, source, tex_x, tex_y) -> None:
     buffer[base_screen + 2] = source[base_tex + 2]
 
 
-def update_display(surface: pygame.Surface, display: pygame.Surface, buffer: list, caption: str) -> None:
+def update_display(surface: pygame.Surface, display: pygame.Surface, buffer, caption: str) -> None:
     """ Updates window contents.
     """
-    a = np.frombuffer(buffer, dtype="uint8")
-    a = a.reshape(SCREEN_WIDTH, SCREEN_HEIGHT, 3)
-    pygame.surfarray.blit_array(surface, a)
+    pygame.surfarray.blit_array(surface, np.frombuffer(buffer, dtype="uint8").reshape(SCREEN_WIDTH, SCREEN_HEIGHT, 3))
 
     pygame.transform.scale(surface, (WINDOW_WIDTH, WINDOW_HEIGHT), display)
     pygame.display.set_caption(caption)
