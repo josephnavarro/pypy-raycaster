@@ -43,9 +43,9 @@ import functools
 from PIL import Image
 
 
-SCREEN_WIDTH: int = 640
-SCREEN_HEIGHT: int = 480
-SCALE: int = 1
+SCREEN_WIDTH: int = 320
+SCREEN_HEIGHT: int = 240
+SCALE: int = 2
 WINDOW_WIDTH: int = SCREEN_WIDTH * SCALE
 WINDOW_HEIGHT: int = SCREEN_HEIGHT * SCALE
 TEX_WIDTH: int = 64
@@ -153,7 +153,7 @@ def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
         perp_wall_dist = (map_y - pos_y + (1 - step_y) * 0.5) / ray_dir_y
 
     if perp_wall_dist > CLIPPING:
-        return False, 0, 0, 0, 0, 0, 0
+        return False, 0, 0, 0, 0, 0, 0, 1
 
     # Calculate height of line to draw on screen
     line_height: int = int(h / perp_wall_dist)
@@ -185,13 +185,14 @@ def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
     step: float = TEX_HEIGHT / line_height
 
     # Texturing calculations
-    return True,\
+    return True, \
         (draw_start - h * 0.5 + line_height * 0.5) * step, \
-        draw_start,\
-        draw_end,\
+        draw_start, \
+        draw_end, \
         step, \
         WORLD_MAP[map_x][map_y] - 1, \
-        tex_x
+        tex_x, \
+        perp_wall_dist
 
 
 @functools.lru_cache(maxsize=128)
@@ -211,17 +212,18 @@ def floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y) -> tuple:
     row_distance: float = 1.0 if not p else hh / p
 
     if not (row_distance < CLIPPING) or row_distance == 1:
-        return False, 0, 0, 0, 0
+        return False, 0, 0, 0, 0, 1
 
     # Calculate real-world step vector for each x-step (parallel to camera plane)
     # and the real-world coordinates of leftmost column
     inv_w: float = 1 / w
 
-    return True,\
+    return True, \
         row_distance * (ray_dir_x1 - ray_dir_x0) * inv_w, \
         row_distance * (ray_dir_y1 - ray_dir_y0) * inv_w, \
         pos_x + row_distance * ray_dir_x0, \
-        pos_y + row_distance * ray_dir_y0
+        pos_y + row_distance * ray_dir_y0, \
+        row_distance
 
 
 @functools.lru_cache(maxsize=128)
@@ -237,7 +239,7 @@ def floorcast_x(floor_x, floor_y) -> tuple:
     return tx, ty
 
 
-def floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, step_x, step_y) -> None:
+def floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, step_x, step_y, dist) -> None:
     """ Inner loop calculations for floor and ceiling raycasting. In-place, more efficient.
     """
     floor_x += step_x * x
@@ -248,18 +250,28 @@ def floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor
     ty: int = int(TEX_HEIGHT * (floor_y - int(floor_y))) & (TEX_HEIGHT - 1)
 
     # Floor
-    copy_color(buffer, x, y, h, floor_texture, tx, ty)
+    copy_color(buffer, x, y, h, floor_texture, tx, ty, dist)
 
     # Ceiling
-    copy_color(buffer, x, h - y - 1, h, ceiling_texture, tx, ty)
+    copy_color(buffer, x, h - y - 1, h, ceiling_texture, tx, ty, dist)
 
 
-def copy_color(buffer, x, y, h, source, tex_x, tex_y) -> None:
+
+#@functools.lru_cache(maxsize=128)
+def hacky(a, b):
+    return max(min(int(round(a / b)), 255), 0)
+
+
+def copy_color(buffer, x, y, h, source, tex_x, tex_y, divisor=1) -> None:
     base_screen = (x * h + y) * 3
     base_tex = (tex_x * TEX_HEIGHT + tex_y) * 3
-    buffer[base_screen + 0] = source[base_tex + 0]
-    buffer[base_screen + 1] = source[base_tex + 1]
-    buffer[base_screen + 2] = source[base_tex + 2]
+
+    if not divisor:
+        divisor = 1
+
+    buffer[base_screen + 0] = hacky(source[base_tex + 0], divisor)
+    buffer[base_screen + 1] = hacky(source[base_tex + 1], divisor)
+    buffer[base_screen + 2] = hacky(source[base_tex + 2], divisor)
 
 
 def update_display(surface: pygame.Surface, display: pygame.Surface, buffer, caption: str) -> None:
@@ -349,7 +361,7 @@ def main() -> None:
         load_image("pics/mossy.png"),
         load_image("pics/wood.png"),
         load_image("pics/colorstone.png"),
-    ]
+        ]
 
     # buffer: list = np.empty((SCREEN_WIDTH, SCREEN_HEIGHT, 3), dtype="uint8").tolist()
     w: int = SCREEN_WIDTH
@@ -359,7 +371,7 @@ def main() -> None:
     while True:
         # Raycasting for floor/ceiling textures
         for y in range(h >> 1, h):
-            do_continue, fstep_x, fstep_y, floor_x, floor_y = floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y,
+            do_continue, fstep_x, fstep_y, floor_x, floor_y, dist = floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y,
                   pos_x, pos_y)
 
             if do_continue:
@@ -368,18 +380,19 @@ def main() -> None:
                 ceiling_texture = colormap[6]
 
                 for x in range(w):
-                    floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, fstep_x, fstep_y)
+                    floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, fstep_x, fstep_y,
+                          dist * 2)
 
         # Raycasting for wall textures
         for x in range(w):
-            do_continue, tex_pos, y1, y2, step, tex_num, tex_x = wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y,
+            do_continue, tex_pos, y1, y2, step, tex_num, tex_x, dist = wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y,
                   pos_x, pos_y)
 
             if do_continue:
                 texture = colormap[tex_num]
 
                 for y in range(y1, y2):
-                    copy_color(buffer, x, y, h, texture, tex_x, int(tex_pos + step * (y - y1)) & (TEX_HEIGHT - 1))
+                    copy_color(buffer, x, y, h, texture, tex_x, int(tex_pos + step * (y - y1)) & (TEX_HEIGHT - 1), dist)
 
         # Update display
         caption: str = "Textured Raycaster | FPS = {0:.2f}".format(clock.get_fps())
