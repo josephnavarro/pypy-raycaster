@@ -43,8 +43,8 @@ import functools
 from PIL import Image
 
 
-SCREEN_WIDTH: int = 800
-SCREEN_HEIGHT: int = 600
+SCREEN_WIDTH: int = 1024
+SCREEN_HEIGHT: int = 768
 SCALE: int = 1
 WINDOW_WIDTH: int = SCREEN_WIDTH * SCALE
 WINDOW_HEIGHT: int = SCREEN_HEIGHT * SCALE
@@ -52,7 +52,7 @@ TEX_WIDTH: int = 64
 TEX_HEIGHT: int = 64
 MAP_WIDTH: int = 24
 MAP_HEIGHT: int = 24
-FPS: int = 33
+FPS: int = 60
 
 WORLD_MAP = [
     [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -345,7 +345,7 @@ def main() -> None:
 
     while True:
         # Raycasting for floor/ceiling textures
-        for y in range(h):
+        for y in range(h >> 1, h):
             fstep_x, fstep_y, floor_x, floor_y = floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y)
 
             # Choose texture, draw pixel
