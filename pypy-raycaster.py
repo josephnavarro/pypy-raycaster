@@ -53,7 +53,7 @@ TEX_HEIGHT: int = 64
 MAP_WIDTH: int = 24
 MAP_HEIGHT: int = 24
 FPS: int = 60
-CLIPPING: int = 100
+CLIPPING: int = 100  # Really high number invalidates clipping
 
 WORLD_MAP = [
     [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -152,6 +152,7 @@ def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
     else:
         perp_wall_dist = (map_y - pos_y + (1 - step_y) * 0.5) / ray_dir_y
 
+    # Don't render if too far
     if perp_wall_dist > CLIPPING:
         return False, 0, 0, 0, 0, 0, 0, 1
 
@@ -211,6 +212,7 @@ def floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y) -> tuple:
     # (0.5 = z-position of midpoint between floor and ceiling)
     row_distance: float = 1.0 if not p else hh / p
 
+    # Don't render if too far
     if not (row_distance < CLIPPING) or row_distance == 1:
         return False, 0, 0, 0, 0, 1
 
@@ -259,10 +261,14 @@ def floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor
 
 #@functools.lru_cache(maxsize=128)
 def hacky(a, b):
+    """ Damps and clamps a color channel.
+    """
     return max(min(int(round(a / b)), 255), 0)
 
 
 def copy_color(buffer, x, y, h, source, tex_x, tex_y, divisor=1) -> None:
+    """ Copies color from a source bytearray to a buffer.
+    """
     base_screen = (x * h + y) * 3
     base_tex = (tex_x * TEX_HEIGHT + tex_y) * 3
 
@@ -278,7 +284,6 @@ def update_display(surface: pygame.Surface, display: pygame.Surface, buffer, cap
     """ Updates window contents.
     """
     pygame.surfarray.blit_array(surface, np.frombuffer(buffer, dtype="uint8").reshape(SCREEN_WIDTH, SCREEN_HEIGHT, 3))
-
     pygame.transform.scale(surface, (WINDOW_WIDTH, WINDOW_HEIGHT), display)
     pygame.display.set_caption(caption)
     pygame.display.flip()
@@ -343,8 +348,8 @@ def main() -> None:
     pos_y: float = 11.5
     dir_x: float = -1.0
     dir_y: float = 0.0
-    plane_x: float = 0.0
-    plane_y: float = 0.66
+    pln_x: float = 0.0
+    pln_y: float = 0.66
 
     # Create display-related objects (PyGame)
     pygame.display.set_caption("Textured Raycaster")
@@ -371,37 +376,30 @@ def main() -> None:
     while True:
         # Raycasting for floor/ceiling textures
         for y in range(h >> 1, h):
-            do_continue, fstep_x, fstep_y, floor_x, floor_y, dist = floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y,
-                  pos_x, pos_y)
-
-            if do_continue:
+            do_draw, fstep_x, fstep_y, fx, fy, dist = floorcast_y(y, w, h, dir_x, pln_x, dir_y, pln_y, pos_x, pos_y)
+            if do_draw:
                 # Choose texture, draw pixel
-                floor_texture = colormap[3]
-                ceiling_texture = colormap[6]
-
+                ftex = colormap[3]
+                ctex = colormap[6]
                 for x in range(w):
-                    floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, fstep_x, fstep_y,
-                          dist)
+                    floorcast_x2(buffer, x, y, h, ftex, ctex, fx, fy, fstep_x, fstep_y, dist)
 
         # Raycasting for wall textures
         for x in range(w):
-            do_continue, tex_pos, y1, y2, step, tex_num, tex_x, dist = wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y,
-                  pos_x, pos_y)
-
-            if do_continue:
-                texture = colormap[tex_num]
-
+            do_draw, tpos, y1, y2, step, tid, tex_x, dist = wallcast(x, w, h, dir_x, pln_x, dir_y, pln_y, pos_x, pos_y)
+            if do_draw:
+                tex = colormap[tid]
                 for y in range(y1, y2):
-                    copy_color(buffer, x, y, h, texture, tex_x, int(tex_pos + step * (y - y1)) & (TEX_HEIGHT - 1), dist)
+                    copy_color(buffer, x, y, h, tex, tex_x, int(tpos + step * (y - y1)) & (TEX_HEIGHT - 1), dist)
 
         # Update display
         caption: str = "Textured Raycaster | FPS = {0:.2f}".format(clock.get_fps())
         update_display(surface, display, buffer, caption)
-        buffer[:] = b'\x00' * len(buffer)
+        buffer[:] = b'\x00' * len(buffer)  # Clear buffer
 
         # Grab user input
         dt: float = clock.tick(FPS) * 0.001
-        pos_x, pos_y, dir_x, dir_y, plane_x, plane_y = update_events(dt, pos_x, pos_y, dir_x, dir_y, plane_x, plane_y)
+        pos_x, pos_y, dir_x, dir_y, pln_x, pln_y = update_events(dt, pos_x, pos_y, dir_x, dir_y, pln_x, pln_y)
 
 
 if __name__ == "__main__":
