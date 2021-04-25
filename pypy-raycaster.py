@@ -53,7 +53,7 @@ TEX_HEIGHT: int = 64
 MAP_WIDTH: int = 24
 MAP_HEIGHT: int = 24
 FPS: int = 60
-CLIPPING: int = 100
+CLIPPING: int = 10
 
 WORLD_MAP = [
     [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -384,6 +384,7 @@ def main() -> None:
         # Update display
         caption: str = "Textured Raycaster | FPS = {0:.2f}".format(clock.get_fps())
         update_display(surface, display, buffer, caption)
+        buffer[:] = b'\x00' * len(buffer)
 
         # Grab user input
         dt: float = clock.tick(FPS) * 0.001
