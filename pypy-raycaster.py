@@ -43,8 +43,8 @@ import functools
 from PIL import Image
 
 
-SCREEN_WIDTH: int = 800
-SCREEN_HEIGHT: int = 600
+SCREEN_WIDTH: int = 1024
+SCREEN_HEIGHT: int = 768
 SCALE: int = 1
 WINDOW_WIDTH: int = SCREEN_WIDTH * SCALE
 WINDOW_HEIGHT: int = SCREEN_HEIGHT * SCALE
@@ -52,7 +52,7 @@ TEX_WIDTH: int = 64
 TEX_HEIGHT: int = 64
 MAP_WIDTH: int = 24
 MAP_HEIGHT: int = 24
-FPS: int = 30
+FPS: int = 60
 
 WORLD_MAP = [
     [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -93,8 +93,7 @@ def load_image(filename):
     texture = bytearray(TEX_HEIGHT * TEX_WIDTH * 3)
     for tex_y in range(TEX_HEIGHT):
         for tex_x in range(TEX_WIDTH):
-            # This is actually the most important line: force the use of a
-            # Python int, vs a numpy uint8
+            # This is actually the most important line: force the use of a Python int, vs a numpy uint8
             red, green, blue = [int(x) for x in data[tex_x, tex_y]]
             texture[(tex_x * TEX_HEIGHT + tex_y) * 3 + 0] = red
             texture[(tex_x * TEX_HEIGHT + tex_y) * 3 + 1] = green
@@ -119,7 +118,7 @@ def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
     delta_dist_y: float = 0 if ray_dir_x == 0 else (1 if ray_dir_y == 0 else abs(1 / ray_dir_y))
 
     # What direction to step in, x- or y-direction
-    hit, side = 0, 0
+    hit, side = False, False
 
     # Calculate step and initial side_dist
     if ray_dir_x < 0:
@@ -133,21 +132,21 @@ def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
         step_y, side_dist_y = 1, (map_y + 1.0 - pos_y) * delta_dist_y
 
     # Perform DDA
-    while hit == 0:
+    while not hit:
         if side_dist_x < side_dist_y:
             side_dist_x += delta_dist_x
             map_x += step_x
-            side = 0
+            side = False
         else:
             side_dist_y += delta_dist_y
             map_y += step_y
-            side = 1
+            side = True
 
         if WORLD_MAP[map_x][map_y] > 0:
-            hit = 1
+            hit = True
 
     # Calculate distance of perpendicular ray
-    if side == 0:
+    if not side:
         perp_wall_dist = (map_x - pos_x + (1 - step_x) * 0.5) / ray_dir_x
     else:
         perp_wall_dist = (map_y - pos_y + (1 - step_y) * 0.5) / ray_dir_y
@@ -164,62 +163,57 @@ def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
     if draw_end >= h:
         draw_end = h
 
-    # Texturing calculations
-    tex_num: int = WORLD_MAP[map_x][map_y] - 1
-
     # Value of wall_x
-    if side == 0:
+    if not side:
         wall_x = pos_y + perp_wall_dist * ray_dir_y
     else:
         wall_x = pos_x + perp_wall_dist * ray_dir_x
-    wall_x -= math.floor(wall_x)
+    wall_x -= int(wall_x)
 
     # X-coord on texture
     tex_x: int = int(wall_x * TEX_WIDTH)
-    if side == 0 and ray_dir_x > 0:
+    if not side and ray_dir_x > 0:
         tex_x = TEX_WIDTH - tex_x - 1
-    if side == 1 and ray_dir_y < 0:
+    if side and ray_dir_y < 0:
         tex_x = TEX_WIDTH - tex_x - 1
 
     # How much to increase texture coordinate per screen pixel
     step: float = TEX_HEIGHT / line_height
 
-    # Starting tex coord
-    tex_pos: float = (draw_start - h * 0.5 + line_height * 0.5) * step
-    return tex_pos, draw_start, draw_end, step, tex_num, tex_x
+    # Texturing calculations
+    return (draw_start - h * 0.5 + line_height * 0.5) * step,\
+        draw_start, draw_end, step, WORLD_MAP[map_x][map_y] - 1, tex_x
 
 
 @functools.lru_cache(maxsize=128)
-def floorcast_y(y, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
+def floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y) -> tuple:
     """ Outer loop calculations for floor and ceiling raycasting.
     """
     # Ray direction for leftmost ray (x = 0) and rightmost ray (x = w)
     ray_dir_x0, ray_dir_y0 = dir_x - plane_x, dir_y - plane_y
     ray_dir_x1, ray_dir_y1 = dir_x + plane_x, dir_y + plane_y
 
-    # Current y-position compared to the center of the screen (horizon
-    p: int = y - (SCREEN_HEIGHT >> 1)
-
-    # Vertical camera position
-    pos_z: float = 0.5 * SCREEN_HEIGHT
+    # Current y-position compared to the center of the screen (horizon)
+    hh: int = h >> 1
+    p: int = y - hh
 
     # Horizontal distance from camera to floor for current row
-    # 0.5 = z-position of midpoint between floor and ceiling
-    row_distance: float = 1.0 if p == 0 else pos_z / p
+    # (0.5 = z-position of midpoint between floor and ceiling)
+    row_distance: float = 1.0 if not p else hh / p
 
     # Calculate real-world step vector for each x-step (parallel to camera plane)
-    floor_step_x: float = row_distance * (ray_dir_x1 - ray_dir_x0) / SCREEN_WIDTH
-    floor_step_y: float = row_distance * (ray_dir_y1 - ray_dir_y0) / SCREEN_WIDTH
+    # and the real-world coordinates of leftmost column
+    inv_w: float = 1 / w
 
-    # Real-world coordinates of leftmost column
-    floor_x, floor_y = pos_x + row_distance * ray_dir_x0, pos_y + row_distance * ray_dir_y0
-
-    return floor_step_x, floor_step_y, floor_x, floor_y
+    return row_distance * (ray_dir_x1 - ray_dir_x0) * inv_w, \
+        row_distance * (ray_dir_y1 - ray_dir_y0) * inv_w, \
+        pos_x + row_distance * ray_dir_x0, \
+        pos_y + row_distance * ray_dir_y0
 
 
 @functools.lru_cache(maxsize=128)
-def floorcast_x(floor_x, floor_y):
-    """ Inner loop calculations for floor and ceiling raycasting.
+def floorcast_x(floor_x, floor_y) -> tuple:
+    """ Inner loop calculations for floor and ceiling raycasting. (TODO: Not currently used).
     """
     cell_x, cell_y = int(floor_x), int(floor_y)
 
@@ -230,26 +224,25 @@ def floorcast_x(floor_x, floor_y):
     return tx, ty
 
 
-def floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, step_x, step_y):
-    """ Inner loop calculations for floor and ceiling raycasting.
+def floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, step_x, step_y) -> None:
+    """ Inner loop calculations for floor and ceiling raycasting. In-place, more efficient.
     """
     floor_x += step_x * x
     floor_y += step_y * x
-    cell_x, cell_y = int(floor_x), int(floor_y)
 
     # Get texture coordinate from fractional parts
-    tx: int = int(TEX_WIDTH * (floor_x - cell_x)) & (TEX_WIDTH - 1)
-    ty: int = int(TEX_HEIGHT * (floor_y - cell_y)) & (TEX_HEIGHT - 1)
+    tx: int = int(TEX_WIDTH * (floor_x - int(floor_x))) & (TEX_WIDTH - 1)
+    ty: int = int(TEX_HEIGHT * (floor_y - int(floor_y))) & (TEX_HEIGHT - 1)
 
     # Floor
-    copy_color(buffer, x, y, floor_texture, tx, ty)
+    copy_color(buffer, x, y, h, floor_texture, tx, ty)
 
     # Ceiling
-    copy_color(buffer, x, h - y - 1, ceiling_texture, tx, ty)
+    copy_color(buffer, x, h - y - 1, h, ceiling_texture, tx, ty)
 
 
-def copy_color(buffer, x, y, source, tex_x, tex_y) -> None:
-    base_screen = (x * SCREEN_HEIGHT + y) * 3
+def copy_color(buffer, x, y, h, source, tex_x, tex_y) -> None:
+    base_screen = (x * h + y) * 3
     base_tex = (tex_x * TEX_HEIGHT + tex_y) * 3
     buffer[base_screen + 0] = source[base_tex + 0]
     buffer[base_screen + 1] = source[base_tex + 1]
@@ -346,31 +339,29 @@ def main() -> None:
     ]
 
     # buffer: list = np.empty((SCREEN_WIDTH, SCREEN_HEIGHT, 3), dtype="uint8").tolist()
-    buffer = bytearray(b"0" * SCREEN_WIDTH * SCREEN_HEIGHT * 3)
     w: int = SCREEN_WIDTH
     h: int = SCREEN_HEIGHT
+    buffer = bytearray(b"0" * w * h * 3)
 
     while True:
         # Raycasting for floor/ceiling textures
-        for y in range(0, h):
-            floor_step_x, floor_step_y, floor_x, floor_y = floorcast_y(y, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y)
+        for y in range(h >> 1, h):
+            fstep_x, fstep_y, floor_x, floor_y = floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y)
 
             # Choose texture, draw pixel
             floor_texture = colormap[3]
             ceiling_texture = colormap[6]
 
-            for x in range(0, w):
-                floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, floor_step_x, floor_step_y)
+            for x in range(w):
+                floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, fstep_x, fstep_y)
 
         # Raycasting for wall textures
-        for x in range(0, w):
+        for x in range(w):
             tex_pos, y1, y2, step, tex_num, tex_x = wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y)
             texture = colormap[tex_num]
 
             for y in range(y1, y2):
-                tex_y: int = int(tex_pos) & (TEX_HEIGHT - 1)
-                tex_pos += step
-                copy_color(buffer, x, y, texture, tex_x, tex_y)
+                copy_color(buffer, x, y, h, texture, tex_x, int(tex_pos + step * (y - y1)) & (TEX_HEIGHT - 1))
 
         # Update display
         caption: str = "Textured Raycaster | FPS = {0:.2f}".format(clock.get_fps())
