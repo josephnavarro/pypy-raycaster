@@ -53,7 +53,7 @@ TEX_HEIGHT: int = 64
 MAP_WIDTH: int = 24
 MAP_HEIGHT: int = 24
 FPS: int = 60
-CLIPPING: int = 10
+CLIPPING: int = 100
 
 WORLD_MAP = [
     [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -192,7 +192,7 @@ def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
         step, \
         WORLD_MAP[map_x][map_y] - 1, \
         tex_x, \
-        perp_wall_dist
+        max(perp_wall_dist, 1)
 
 
 @functools.lru_cache(maxsize=128)
@@ -223,7 +223,7 @@ def floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y) -> tuple:
         row_distance * (ray_dir_y1 - ray_dir_y0) * inv_w, \
         pos_x + row_distance * ray_dir_x0, \
         pos_y + row_distance * ray_dir_y0, \
-        row_distance
+        max(row_distance, 1)
 
 
 @functools.lru_cache(maxsize=128)
@@ -381,7 +381,7 @@ def main() -> None:
 
                 for x in range(w):
                     floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, fstep_x, fstep_y,
-                          dist * 2)
+                          dist)
 
         # Raycasting for wall textures
         for x in range(w):
