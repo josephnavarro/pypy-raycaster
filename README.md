@@ -3,7 +3,7 @@
 ## Overview
 **PyPy Raycaster** is a PyPy implementation of a simple raycasting engine as per [Lode's tutorial](https://lodev.org/cgtutor/raycasting.html).
 
-### Source
+### Demo
 <img src="examples/example.gif" alt="screen" width="50%" height="50%">
 
 ## Dependencies
