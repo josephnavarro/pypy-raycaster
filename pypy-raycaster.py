@@ -39,12 +39,11 @@ information has nevertheless been copied over from Lode Vandevenne's original C+
 import pygame
 import numpy as np
 import math
-import functools
 from PIL import Image
 
 
-SCREEN_WIDTH: int = 640
-SCREEN_HEIGHT: int = 480
+SCREEN_WIDTH: int = 1024
+SCREEN_HEIGHT: int = 768
 SCALE: int = 1
 WINDOW_WIDTH: int = SCREEN_WIDTH * SCALE
 WINDOW_HEIGHT: int = SCREEN_HEIGHT * SCALE
@@ -52,8 +51,8 @@ TEX_WIDTH: int = 64
 TEX_HEIGHT: int = 64
 MAP_WIDTH: int = 24
 MAP_HEIGHT: int = 24
-FPS: int = 60
-CLIPPING: int = 10
+FPS: int = 30
+CLIPPING: int = 100  # Far clipping plane's distance from camera; high value effectively disables clipping plane
 
 WORLD_MAP = [
     [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -103,7 +102,6 @@ def load_image(filename):
     return texture
 
 
-@functools.lru_cache(maxsize=128)
 def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
     """ Calculations for wall raycasting.
     """
@@ -194,7 +192,6 @@ def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
         tex_x
 
 
-@functools.lru_cache(maxsize=128)
 def floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y) -> tuple:
     """ Outer loop calculations for floor and ceiling raycasting.
     """
@@ -224,7 +221,6 @@ def floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y) -> tuple:
         pos_y + row_distance * ray_dir_y0
 
 
-@functools.lru_cache(maxsize=128)
 def floorcast_x(floor_x, floor_y) -> tuple:
     """ Inner loop calculations for floor and ceiling raycasting. (TODO: Not currently used).
     """
