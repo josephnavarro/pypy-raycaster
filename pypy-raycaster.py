@@ -81,6 +81,60 @@ WORLD_MAP = [
     [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
     ]
 
+CEIL_MAP = [
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
+    [4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [4, 7, 1, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [4, 7, 2, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [4, 7, 3, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [4, 7, 4, 7, 7, 7, 7, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7],
+    [4, 7, 5, 7, 7, 7, 7, 5, 7, 5, 7, 5, 7, 5, 7, 5, 7, 7, 7, 7, 7, 7, 7, 1],
+    [4, 7, 6, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 8],
+    [4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 1],
+    [4, 7, 8, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 8],
+    [4, 7, 7, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 1],
+    [4, 7, 7, 7, 7, 7, 7, 5, 5, 5, 5, 7, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 1],
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 4],
+    [6, 6, 6, 6, 6, 6, 7, 6, 6, 6, 6, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 6, 7, 6, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3],
+    [4, 7, 7, 7, 7, 7, 7, 7, 7, 4, 6, 7, 6, 2, 7, 7, 7, 7, 7, 2, 7, 7, 7, 2],
+    [4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 2, 7, 7, 5, 7, 7, 2, 7, 7, 7, 2],
+    [4, 7, 7, 7, 7, 7, 7, 7, 7, 4, 6, 7, 6, 2, 7, 7, 7, 7, 7, 2, 2, 7, 2, 2],
+    [4, 7, 6, 7, 6, 7, 7, 7, 7, 4, 6, 7, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 2],
+    [4, 7, 7, 5, 7, 7, 7, 7, 7, 4, 6, 7, 6, 2, 7, 7, 7, 7, 7, 2, 2, 7, 2, 2],
+    [4, 7, 6, 7, 6, 7, 7, 7, 7, 4, 6, 7, 6, 2, 7, 7, 5, 7, 7, 2, 7, 7, 7, 2],
+    [4, 7, 7, 7, 7, 7, 7, 7, 7, 4, 6, 7, 6, 2, 7, 7, 7, 7, 7, 2, 7, 7, 7, 2],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
+    ]
+
+FLOOR_MAP = [
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 7],
+    [4, 4, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7],
+    [4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7],
+    [4, 4, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 7],
+    [4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 4, 7, 7, 7, 7, 7],
+    [4, 4, 5, 4, 4, 4, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 7, 4, 4, 4, 7, 7, 7, 1],
+    [4, 4, 6, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 5, 7, 4, 4, 4, 4, 4, 4, 8],
+    [4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 1],
+    [4, 4, 8, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 5, 7, 4, 4, 4, 4, 4, 4, 8],
+    [4, 4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 5, 7, 4, 4, 4, 7, 7, 7, 1],
+    [4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 4, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 1],
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [6, 6, 6, 6, 6, 6, 4, 6, 6, 6, 6, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 6, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 6, 2, 4, 4, 4, 4, 4, 2, 4, 4, 4, 2],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 2, 4, 4, 5, 4, 4, 2, 4, 4, 4, 2],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 6, 2, 4, 4, 4, 4, 4, 2, 2, 4, 2, 2],
+    [4, 4, 6, 4, 6, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 2],
+    [4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 6, 4, 6, 2, 4, 4, 4, 4, 4, 2, 2, 4, 2, 2],
+    [4, 4, 6, 4, 6, 4, 4, 4, 4, 4, 6, 4, 6, 2, 4, 4, 5, 4, 4, 2, 4, 4, 4, 2],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 6, 2, 4, 4, 4, 4, 4, 2, 4, 4, 4, 2],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
+    ]
+
 
 def load_image(filename):
     """ Loads an image as a NumPy array.
@@ -221,33 +275,23 @@ def floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y) -> tuple:
         pos_y + row_distance * ray_dir_y0
 
 
-def floorcast_x(floor_x, floor_y) -> tuple:
-    """ Inner loop calculations for floor and ceiling raycasting. (TODO: Not currently used).
-    """
-    cell_x, cell_y = int(floor_x), int(floor_y)
-
-    # Get texture coordinate from fractional parts
-    tx: int = int(TEX_WIDTH * (floor_x - cell_x)) & (TEX_WIDTH - 1)
-    ty: int = int(TEX_HEIGHT * (floor_y - cell_y)) & (TEX_HEIGHT - 1)
-
-    return tx, ty
-
-
-def floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, step_x, step_y) -> None:
-    """ Inner loop calculations for floor and ceiling raycasting. In-place, more efficient.
+def floorcast_x2(buffer, x, y, h, colormap, floor_x, floor_y, step_x, step_y) -> None:
+    """ Inner loop calculations for floor and ceiling raycasting. In-place.
     """
     floor_x += step_x * x
     floor_y += step_y * x
 
+    # Get tile coordinates for floor and ceiling texture
+    map_x: int = int(floor_x)
+    map_y: int = int(floor_y)
+
     # Get texture coordinate from fractional parts
-    tx: int = int(TEX_WIDTH * (floor_x - int(floor_x))) & (TEX_WIDTH - 1)
-    ty: int = int(TEX_HEIGHT * (floor_y - int(floor_y))) & (TEX_HEIGHT - 1)
+    tx: int = int(TEX_WIDTH * (floor_x - map_x)) & (TEX_WIDTH - 1)
+    ty: int = int(TEX_HEIGHT * (floor_y - map_y)) & (TEX_HEIGHT - 1)
 
-    # Floor
-    copy_color(buffer, x, y, h, floor_texture, tx, ty)
-
-    # Ceiling
-    copy_color(buffer, x, h - y - 1, h, ceiling_texture, tx, ty)
+    if 0 <= map_x < MAP_WIDTH and 0 <= map_y < MAP_HEIGHT:
+        copy_color(buffer, x, y, h, colormap[FLOOR_MAP[map_x][map_y] - 1], tx, ty)  # Floor
+        copy_color(buffer, x, h - y - 1, h, colormap[CEIL_MAP[map_x][map_y] - 1], tx, ty)  # Ceiling
 
 
 def copy_color(buffer, x, y, h, source, tex_x, tex_y) -> None:
@@ -355,16 +399,12 @@ def main() -> None:
     while True:
         # Raycasting for floor/ceiling textures
         for y in range(h >> 1, h):
-            do_continue, fstep_x, fstep_y, floor_x, floor_y = floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y,
+            do_continue, step_x, step_y, floor_x, floor_y = floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y,
                   pos_x, pos_y)
 
             if do_continue:
-                # Choose texture, draw pixel
-                floor_texture = colormap[3]
-                ceiling_texture = colormap[6]
-
                 for x in range(w):
-                    floorcast_x2(buffer, x, y, h, floor_texture, ceiling_texture, floor_x, floor_y, fstep_x, fstep_y)
+                    floorcast_x2(buffer, x, y, h, colormap, floor_x, floor_y, step_x, step_y)
 
         # Raycasting for wall textures
         for x in range(w):
@@ -373,7 +413,6 @@ def main() -> None:
 
             if do_continue:
                 texture = colormap[tex_num]
-
                 for y in range(y1, y2):
                     copy_color(buffer, x, y, h, texture, tex_x, int(tex_pos + step * (y - y1)) & (TEX_HEIGHT - 1))
 
