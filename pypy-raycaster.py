@@ -388,4 +388,54 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    import os
+    import sys
+
+    logfile = os.path.join(os.path.dirname(__file__), "replay.py")
+    if "--record" in sys.argv:
+        recording = open(logfile, "w")
+        original = update_events
+        events = {}
+        def update_events(*args):
+            try:
+                result = original(*args)
+                events[result] = None
+            except SystemExit:
+                recording.write("REPLAY_LOG = %r" % list(events.keys()))
+                raise
+            return result
+
+    if "--replay" in sys.argv:
+        from replay import REPLAY_LOG
+        replay_idx = -1
+        def update_events(*args):
+            global replay_idx
+            replay_idx += 1
+            try:
+                return REPLAY_LOG[replay_idx]
+            except IndexError:
+                raise SystemExit
+
+    if "--bench" in sys.argv:
+        from replay import REPLAY_LOG
+        BENCH_ITERATIONS = 5
+        print("Running %d iterations at %d frames each" % (BENCH_ITERATIONS, len(REPLAY_LOG)))
+        replay_idx = -1
+        iteration = 0
+        start = pygame.time.get_ticks()
+        def update_events(*args):
+            global start, replay_idx, iteration
+            replay_idx += 1
+            try:
+                return REPLAY_LOG[replay_idx]
+            except IndexError:
+                print("Iteration %d time: %dms" % (iteration, pygame.time.get_ticks() - start))
+                start = pygame.time.get_ticks()
+                iteration += 1
+                replay_idx = 0
+                if iteration > BENCH_ITERATIONS:
+                    raise SystemExit
+                else:
+                    return REPLAY_LOG[replay_idx]
+
     main()
