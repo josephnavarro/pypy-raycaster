@@ -53,6 +53,7 @@ MAP_WIDTH: int = 24
 MAP_HEIGHT: int = 24
 FPS: int = 30
 CLIPPING: int = 100  # Far clipping plane's distance from camera; high value effectively disables clipping plane
+CLIPPING_ENABLED: bool = False
 
 WORLD_MAP = [
     [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -204,7 +205,7 @@ def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
     else:
         perp_wall_dist = (map_y - pos_y + (1 - step_y) * 0.5) / ray_dir_y
 
-    if perp_wall_dist > CLIPPING:
+    if CLIPPING_ENABLED and perp_wall_dist > CLIPPING:
         return False, 0, 0, 0, 0, 0, 0
 
     # Calculate height of line to draw on screen
@@ -261,7 +262,7 @@ def floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y) -> tuple:
     # (0.5 = z-position of midpoint between floor and ceiling)
     row_distance: float = 1.0 if not p else hh / p
 
-    if not (row_distance < CLIPPING) or row_distance == 1:
+    if (CLIPPING_ENABLED and row_distance >= CLIPPING) or row_distance == 1:
         return False, 0, 0, 0, 0
 
     # Calculate real-world step vector for each x-step (parallel to camera plane)
@@ -419,7 +420,10 @@ def main() -> None:
         # Update display
         caption: str = "Textured Raycaster | FPS = {0:.2f}".format(clock.get_fps())
         update_display(surface, display, buffer, caption)
-        buffer[:] = b'\x00' * len(buffer)
+
+        # Clear screen buffer if using far clipping plane
+        if CLIPPING_ENABLED:
+            buffer[:] = b'\x00' * len(buffer)
 
         # Grab user input
         dt: float = clock.tick(FPS) * 0.001
