@@ -41,7 +41,6 @@ import numpy as np
 import math
 from PIL import Image
 
-
 SCREEN_WIDTH: int = 1024
 SCREEN_HEIGHT: int = 768
 SCALE: int = 1
@@ -56,85 +55,122 @@ CLIPPING: int = 100  # Far clipping plane's distance from camera; high value eff
 CLIPPING_ENABLED: bool = False
 
 WORLD_MAP = [
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
-    [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 7],
-    [4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7],
-    [4, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7],
-    [4, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 7],
-    [4, 0, 4, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 0, 7, 7, 7, 7, 7],
-    [4, 0, 5, 0, 0, 0, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 7, 0, 0, 0, 7, 7, 7, 1],
-    [4, 0, 6, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 8],
-    [4, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 1],
-    [4, 0, 8, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 8],
-    [4, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 7, 0, 0, 0, 7, 7, 7, 1],
-    [4, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 1],
-    [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-    [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4],
-    [6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-    [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 6, 0, 6, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3],
-    [4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2],
-    [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 2, 0, 0, 5, 0, 0, 2, 0, 0, 0, 2],
-    [4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2],
-    [4, 0, 6, 0, 6, 0, 0, 0, 0, 4, 6, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 2],
-    [4, 0, 0, 5, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 2, 0, 2, 2],
-    [4, 0, 6, 0, 6, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 5, 0, 0, 2, 0, 0, 0, 2],
-    [4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 0, 6, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2],
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
-    ]
+    [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 6, 4, 4, 6, 4, 6, 4, 4, 4, 6, 4],
+    [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+    [8, 0, 3, 3, 0, 0, 0, 0, 0, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6],
+    [8, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6],
+    [8, 0, 3, 3, 0, 0, 0, 0, 0, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4],
+    [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 4, 0, 0, 0, 0, 0, 6, 6, 6, 0, 6, 4, 6],
+    [8, 8, 8, 8, 0, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 6, 0, 0, 0, 0, 0, 6],
+    [7, 7, 7, 7, 0, 7, 7, 7, 7, 0, 8, 0, 8, 0, 8, 0, 8, 4, 0, 4, 0, 6, 0, 6],
+    [7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 0, 0, 0, 0, 0, 6],
+    [7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 0, 0, 0, 0, 4],
+    [7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 6, 0, 6, 0, 6],
+    [7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 4, 6, 0, 6, 6, 6],
+    [7, 7, 7, 7, 0, 7, 7, 7, 7, 8, 8, 4, 0, 6, 8, 4, 8, 3, 3, 3, 0, 3, 3, 3],
+    [2, 2, 2, 2, 0, 2, 2, 2, 2, 4, 6, 4, 0, 0, 6, 0, 6, 3, 0, 0, 0, 0, 0, 3],
+    [2, 2, 0, 0, 0, 0, 0, 2, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3],
+    [2, 0, 0, 0, 0, 0, 0, 0, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3],
+    [1, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 6, 0, 6, 3, 3, 0, 0, 0, 3, 3],
+    [2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 2, 2, 2, 6, 6, 0, 0, 5, 0, 5, 0, 5],
+    [2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 5, 0, 5, 0, 0, 0, 5, 5],
+    [2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5, 0, 5, 0, 5, 0, 5, 0, 5],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
+    [2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5, 0, 5, 0, 5, 0, 5, 0, 5],
+    [2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 5, 0, 5, 0, 0, 0, 5, 5],
+    [2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+]
 
 CEIL_MAP = [
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
-    [4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-    [4, 7, 1, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-    [4, 7, 2, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-    [4, 7, 3, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-    [4, 7, 4, 7, 7, 7, 7, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7],
-    [4, 7, 5, 7, 7, 7, 7, 5, 7, 5, 7, 5, 7, 5, 7, 5, 7, 7, 7, 7, 7, 7, 7, 1],
-    [4, 7, 6, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 8],
-    [4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 1],
-    [4, 7, 8, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 8],
-    [4, 7, 7, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 7, 1],
-    [4, 7, 7, 7, 7, 7, 7, 5, 5, 5, 5, 7, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 1],
-    [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-    [8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 4],
-    [6, 6, 6, 6, 6, 6, 7, 6, 6, 6, 6, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-    [4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 6, 7, 6, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3],
-    [4, 7, 7, 7, 7, 7, 7, 7, 7, 4, 6, 7, 6, 2, 7, 7, 7, 7, 7, 2, 7, 7, 7, 2],
-    [4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 2, 7, 7, 5, 7, 7, 2, 7, 7, 7, 2],
-    [4, 7, 7, 7, 7, 7, 7, 7, 7, 4, 6, 7, 6, 2, 7, 7, 7, 7, 7, 2, 2, 7, 2, 2],
-    [4, 7, 6, 7, 6, 7, 7, 7, 7, 4, 6, 7, 7, 7, 7, 7, 5, 7, 7, 7, 7, 7, 7, 2],
-    [4, 7, 7, 5, 7, 7, 7, 7, 7, 4, 6, 7, 6, 2, 7, 7, 7, 7, 7, 2, 2, 7, 2, 2],
-    [4, 7, 6, 7, 6, 7, 7, 7, 7, 4, 6, 7, 6, 2, 7, 7, 5, 7, 7, 2, 7, 7, 7, 2],
-    [4, 7, 7, 7, 7, 7, 7, 7, 7, 4, 6, 7, 6, 2, 7, 7, 7, 7, 7, 2, 7, 7, 7, 2],
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
-    ]
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
+]
 
 FLOOR_MAP = [
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7],
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 7],
-    [4, 4, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7],
-    [4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7],
-    [4, 4, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 7],
-    [4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 4, 7, 7, 7, 7, 7],
-    [4, 4, 5, 4, 4, 4, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 7, 4, 4, 4, 7, 7, 7, 1],
-    [4, 4, 6, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 5, 7, 4, 4, 4, 4, 4, 4, 8],
-    [4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 1],
-    [4, 4, 8, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 5, 7, 4, 4, 4, 4, 4, 4, 8],
-    [4, 4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 5, 7, 4, 4, 4, 7, 7, 7, 1],
-    [4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 4, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 1],
-    [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-    [8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
-    [6, 6, 6, 6, 6, 6, 4, 6, 6, 6, 6, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 6, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3],
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 6, 2, 4, 4, 4, 4, 4, 2, 4, 4, 4, 2],
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 2, 4, 4, 5, 4, 4, 2, 4, 4, 4, 2],
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 6, 2, 4, 4, 4, 4, 4, 2, 2, 4, 2, 2],
-    [4, 4, 6, 4, 6, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 2],
-    [4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 6, 4, 6, 2, 4, 4, 4, 4, 4, 2, 2, 4, 2, 2],
-    [4, 4, 6, 4, 6, 4, 4, 4, 4, 4, 6, 4, 6, 2, 4, 4, 5, 4, 4, 2, 4, 4, 4, 2],
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 6, 2, 4, 4, 4, 4, 4, 2, 4, 4, 4, 2],
-    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
-    ]
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+]
+
+
+class Sprite:
+    def __init__(self, x: float, y: float, texture: int):
+        self.x = x
+        self.y = y
+        self.texture = texture
+
+
+SPRITE_LIST = [
+    # Green lights
+    Sprite(20.5, 11.5, 10),
+    Sprite(18.5, 4.5, 10),
+    Sprite(10.0, 4.5, 10),
+    Sprite(10.0, 12.5, 10),
+    Sprite(3.5, 6.5, 10),
+    Sprite(3.5, 20.5, 10),
+    Sprite(3.5, 14.5, 10),
+    Sprite(14.5, 20.5, 10),
+
+    # Pillars
+    Sprite(18.5, 10.5, 9),
+    Sprite(18.5, 11.5, 9),
+    Sprite(18.5, 12.5, 9),
+
+    # Barrels
+    Sprite(21.5, 1.5, 8),
+    Sprite(15.5, 1.5, 8),
+    Sprite(16.0, 1.8, 8),
+    Sprite(16.2, 1.2, 8),
+    Sprite(3.5, 2.5, 8),
+    Sprite(9.5, 15.5, 8),
+    Sprite(10.0, 15.1, 8),
+    Sprite(10.5, 15.0, 8),
+]
+
+NUM_SPRITES: int = 19
 
 
 def load_image(filename):
@@ -206,7 +242,7 @@ def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
         perp_wall_dist = (map_y - pos_y + (1 - step_y) * 0.5) / ray_dir_y
 
     if CLIPPING_ENABLED and perp_wall_dist > CLIPPING:
-        return False, 0, 0, 0, 0, 0, 0
+        return False, 0, 0, 0, 0, 0, 0, perp_wall_dist
 
     # Calculate height of line to draw on screen
     line_height: int = int(h / perp_wall_dist)
@@ -238,13 +274,14 @@ def wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y):
     step: float = TEX_HEIGHT / line_height
 
     # Texturing calculations
-    return True,\
-        (draw_start - h * 0.5 + line_height * 0.5) * step, \
-        draw_start,\
-        draw_end,\
-        step, \
-        WORLD_MAP[map_x][map_y] - 1, \
-        tex_x
+    return True, \
+           (draw_start - h * 0.5 + line_height * 0.5) * step, \
+           draw_start, \
+           draw_end, \
+           step, \
+           WORLD_MAP[map_x][map_y] - 1, \
+           tex_x, \
+           perp_wall_dist
 
 
 def floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y) -> tuple:
@@ -269,11 +306,11 @@ def floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y, pos_x, pos_y) -> tuple:
     # and the real-world coordinates of leftmost column
     inv_w: float = 1 / w
 
-    return True,\
-        row_distance * (ray_dir_x1 - ray_dir_x0) * inv_w, \
-        row_distance * (ray_dir_y1 - ray_dir_y0) * inv_w, \
-        pos_x + row_distance * ray_dir_x0, \
-        pos_y + row_distance * ray_dir_y0
+    return True, \
+           row_distance * (ray_dir_x1 - ray_dir_x0) * inv_w, \
+           row_distance * (ray_dir_y1 - ray_dir_y0) * inv_w, \
+           pos_x + row_distance * ray_dir_x0, \
+           pos_y + row_distance * ray_dir_y0
 
 
 def floorcast_x2(buffer, x, y, h, colormap, floor_x, floor_y, step_x, step_y) -> None:
@@ -301,6 +338,16 @@ def copy_color(buffer, x, y, h, source, tex_x, tex_y) -> None:
     buffer[base_screen + 0] = source[base_tex + 0]
     buffer[base_screen + 1] = source[base_tex + 1]
     buffer[base_screen + 2] = source[base_tex + 2]
+
+
+def sort_sprites(order, dist, amount):
+    sprites = [tuple() for _ in range(amount)]
+    for i in range(amount):
+        sprites[i] = (dist[i], order[i])
+    sprites.sort(key=lambda n: n[0])
+    for i in range(amount):
+        dist[i] = sprites[amount - i - 1][0]
+        order[i] = sprites[amount - i - 1][1]
 
 
 def update_display(surface: pygame.Surface, display: pygame.Surface, buffer, caption: str) -> None:
@@ -390,6 +437,9 @@ def main() -> None:
         load_image("pics/mossy.png"),
         load_image("pics/wood.png"),
         load_image("pics/colorstone.png"),
+        load_image("pics/barrel.png"),
+        load_image("pics/pillar.png"),
+        load_image("pics/greenlight.png"),
     ]
 
     # buffer: list = np.empty((SCREEN_WIDTH, SCREEN_HEIGHT, 3), dtype="uint8").tolist()
@@ -397,11 +447,16 @@ def main() -> None:
     h: int = SCREEN_HEIGHT
     buffer = bytearray(b"0" * w * h * 3)
 
+    # Sprite rendering utility lists
+    sprite_order = [0 for n in range(NUM_SPRITES)]
+    sprite_distance = [0.0 for n in range(NUM_SPRITES)]
+    z_buffer = [0 for x in range(w)]
+
     while True:
         # Raycasting for floor/ceiling textures
         for y in range(h >> 1, h):
             do_continue, step_x, step_y, floor_x, floor_y = floorcast_y(y, w, h, dir_x, plane_x, dir_y, plane_y,
-                  pos_x, pos_y)
+                pos_x, pos_y)
 
             if do_continue:
                 for x in range(w):
@@ -409,13 +464,74 @@ def main() -> None:
 
         # Raycasting for wall textures
         for x in range(w):
-            do_continue, tex_pos, y1, y2, step, tex_num, tex_x = wallcast(x, w, h, dir_x, plane_x, dir_y, plane_y,
-                  pos_x, pos_y)
+            do_continue, tex_pos, y1, y2, step, tex_num, tex_x, perp_dist = wallcast(x, w, h, dir_x, plane_x, dir_y,
+                plane_y, pos_x, pos_y)
 
             if do_continue:
                 texture = colormap[tex_num]
                 for y in range(y1, y2):
                     copy_color(buffer, x, y, h, texture, tex_x, int(tex_pos + step * (y - y1)) & (TEX_HEIGHT - 1))
+
+            z_buffer[x] = perp_dist
+
+        for i in range(NUM_SPRITES):
+            sprite_order[i] = i
+            sprite_distance[i] = (
+                (pos_x - SPRITE_LIST[i].x) * (pos_x - SPRITE_LIST[i].x)
+                +
+                (pos_y - SPRITE_LIST[i].y) * (pos_y - SPRITE_LIST[i].y)
+            )
+
+        sort_sprites(sprite_order, sprite_distance, NUM_SPRITES)
+
+        for i in range(NUM_SPRITES):
+            # Translate sprite position to be relative to camera
+            sprite_x: float = SPRITE_LIST[sprite_order[i]].x - pos_x
+            sprite_y: float = SPRITE_LIST[sprite_order[i]].y - pos_y
+
+            # Transform sprite with inverse camera matrix
+            inv_det: float = 1.0 / (plane_x * dir_y - dir_x * plane_y)
+            transform_x: float = inv_det * (dir_y * sprite_x - dir_x * sprite_y)
+            transform_y: float = inv_det * (-plane_y * sprite_x + plane_x * sprite_y)
+
+            sprite_screen_x: int = int((w * 0.5) * (1 + transform_x / transform_y))
+
+            # Calculate height of sprite on screen
+            sprite_height: int = abs(int(h / transform_y))
+            draw_start_y: int = ((-sprite_height) >> 1) + (h >> 1)
+            if draw_start_y < 0:
+                draw_start_y = 0
+            draw_end_y: int = (sprite_height >> 1) + (h >> 1)
+            if draw_end_y >= h:
+                draw_end_y = h - 1
+
+            # Calculate width of sprite on screen
+            sprite_width: int = abs(int(h / transform_y))
+            draw_start_x: int = ((-sprite_width) >> 1) + sprite_screen_x
+            if draw_start_x < 0:
+                draw_start_x = 0
+            draw_end_x: int = (sprite_width >> 1) + sprite_screen_x
+            if draw_end_x >= w:
+                draw_end_x = w - 1
+
+            for stripe in range(draw_start_x, draw_end_x):
+                tex_x: int = \
+                    int(((stripe - (((-sprite_width) >> 1) + sprite_screen_x)) << 8) * TEX_WIDTH / sprite_width) >> 8
+                if (transform_y > 0) and (stripe > 0) and (stripe < w) and (transform_y < z_buffer[stripe]):
+                    for y in range(draw_start_y, draw_end_y):
+                        d: int = (y << 8) - (h << 7) + (sprite_height << 7)
+                        tex_y: int = ((d * TEX_HEIGHT) // sprite_height) >> 8
+                        texture = colormap[SPRITE_LIST[sprite_order[i]].texture]
+                        base_tex = (tex_x * TEX_HEIGHT + tex_y) * 3
+                        r = texture[base_tex + 0]
+                        g = texture[base_tex + 1]
+                        b = texture[base_tex + 2]
+
+                        if r or g or b:
+                            base_screen = (stripe * h + y) * 3
+                            buffer[base_screen + 0] = r
+                            buffer[base_screen + 1] = g
+                            buffer[base_screen + 2] = b
 
         # Update display
         caption: str = "Textured Raycaster | FPS = {0:.2f}".format(clock.get_fps())
@@ -439,6 +555,8 @@ if __name__ == "__main__":
         recording = open(logfile, "w")
         original = update_events
         events = {}
+
+
         def update_events(*args):
             try:
                 result = original(*args)
@@ -450,7 +568,10 @@ if __name__ == "__main__":
 
     if "--replay" in sys.argv:
         from replay import REPLAY_LOG
+
         replay_idx = -1
+
+
         def update_events(*args):
             global replay_idx
             replay_idx += 1
@@ -461,11 +582,14 @@ if __name__ == "__main__":
 
     if "--bench" in sys.argv:
         from replay import REPLAY_LOG
+
         BENCH_ITERATIONS = 5
         print("Running %d iterations at %d frames each" % (BENCH_ITERATIONS, len(REPLAY_LOG)))
         replay_idx = -1
         iteration = 0
         start = pygame.time.get_ticks()
+
+
         def update_events(*args):
             global start, replay_idx, iteration
             replay_idx += 1
